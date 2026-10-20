@@ -50,9 +50,22 @@ export function createRemotePanel({ renderer, engine, stage, background, panel, 
       }
     },
     onCount: (n) => {
-      count.textContent = n ? `${n} celular${n > 1 ? 'es' : ''} conectado${n > 1 ? 's' : ''}` : 'Esperando celulares…';
+      phones = n;
+      paintStatus();
+    },
+    onStatus: (up) => {
+      servers = up;
+      paintStatus();
     },
   });
+
+  let phones = 0;
+  let servers = 0;
+  function paintStatus() {
+    if (!host.active) return;
+    const who = phones ? `${phones} celular${phones > 1 ? 'es' : ''} conectado${phones > 1 ? 's' : ''}` : 'Esperando celulares…';
+    count.textContent = servers ? `${who} · enlace activo` : 'Reconectando con el enlace…';
+  }
 
   WATCH.forEach((k) => on(k, () => host.push()));
 
@@ -70,15 +83,15 @@ export function createRemotePanel({ renderer, engine, stage, background, panel, 
       const qr = qrcode(0, 'M');
       qr.addData(url);
       qr.make();
-      $('#remote-qr').src = qr.createDataURL(6, 2);
+      // SVG: se ve nítido a cualquier tamaño y con el margen de 4 módulos que pide el estándar
+      const svg = qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+      $('#remote-qr').src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      paintStatus();
       box.hidden = false;
       btn.textContent = 'Desactivar control remoto';
-      if (location.protocol === 'file:') {
-        toast('Abierto desde un archivo: el celular no va a poder entrar. Usá la versión online.');
-      }
     } catch {
       btn.textContent = 'Activar control remoto';
-      toast('No se pudo activar (¿hay internet?)');
+      toast('No se pudo conectar con los servidores de enlace. ¿Hay internet?');
     }
     btn.disabled = false;
   }

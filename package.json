@@ -14,7 +14,7 @@
     "@fontsource/jetbrains-mono": "^5.3.0",
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
-    "peerjs": "^1.5.5",
+    "mqtt": "^5.16.1",
     "qrcode-generator": "^2.0.4"
   },
   "devDependencies": {

@@ -1,5 +1,7 @@
-// Pantalla del celular: se conecta al host por WebRTC, muestra su estado y manda ordenes.
+// Pantalla del celular: se conecta a la pantalla por los brokers de enlace, muestra su estado y manda ordenes.
 import '../styles/remote.css';
+import { newSecret, importSecret, seal, open } from './crypto.js';
+import { createRelay, brokerList } from './relay.js';
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -18,44 +20,85 @@ export async function startRemote(hostId) {
   const body = el('main', 'r-body');
   root.append(head, body);
 
-  let conn = null;
   let state = null;
-  const send = (c, v) => conn?.open && conn.send({ t: 'cmd', c, v });
+  let relay = null;
+  let key = null;
+  let lastSeq = 0;
+  let lastState = 0;
+  let lastN = 0;
+  const sid = newSecret(6);
+  const nextN = () => (lastN = Math.max(lastN + 1, Date.now()));
+  const sealed = (obj) => seal(key, { ...obj, s: sid, n: nextN() });
 
-  function fail(msg) {
+  const send = async (c, v) => {
+    if (relay) relay.publish(await sealed({ t: 'cmd', c, v }));
+  };
+
+  function fail(msg, hint) {
     dot.className = 'r-dot off';
     status.textContent = msg;
     body.replaceChildren();
     const retry = el('button', 'r-btn wide', 'Reintentar');
     retry.onclick = () => location.reload();
-    body.append(el('p', 'r-note', 'Revisá que la pantalla de VISUAL siga abierta con el control remoto activado, y que los dos tengan internet.'), retry);
+    body.append(el('p', 'r-note', hint || 'Revisá que la pantalla de VISUAL siga abierta con el control remoto activado, y que los dos tengan internet.'), retry);
   }
 
-  let Peer;
+  const secret = location.hash.match(/k=([\w-]+)/)?.[1];
   try {
-    ({ Peer } = await import('peerjs'));
+    if (!secret) throw new Error('sin clave');
+    key = await importSecret(secret);
   } catch {
-    return fail('No se pudo cargar la conexión');
+    return fail('Link incompleto', 'Este link no tiene la clave de conexión. Escaneá de nuevo el QR que muestra la pantalla de VISUAL.');
   }
-  const peer = new Peer();
-  const timeout = setTimeout(() => !conn?.open && fail('No se pudo conectar'), 15000);
-  peer.on('error', () => fail('No se pudo conectar'));
-  peer.on('open', () => {
-    conn = peer.connect(hostId, { reliable: true });
-    conn.on('open', () => {
-      clearTimeout(timeout);
-      dot.className = 'r-dot on';
-      status.textContent = 'Conectado';
-    });
-    conn.on('data', (m) => {
-      if (m?.t === 'state') {
+
+  relay = createRelay({
+    room: hostId,
+    brokers: brokerList(new URLSearchParams(location.search).get('b')),
+    role: 'client',
+    onStatus: () => {},
+    onRaw: async (str) => {
+      const m = str && (await open(key, str));
+      if (m?.t === 'state' && m.seq > lastSeq) {
+        lastSeq = m.seq;
+        lastState = Date.now();
         state = m;
         render();
       }
-    });
-    conn.on('close', () => fail('Se cortó la conexión'));
-    conn.on('error', () => fail('Se cortó la conexión'));
+    },
   });
+  try {
+    await relay.open();
+  } catch {
+    return fail('Sin conexión', 'No se pudo llegar a los servidores de enlace. Probá cambiar entre wifi y datos móviles.');
+  }
+
+  // avisar que estamos y mantener el latido mientras la pestaña esté abierta
+  relay.publish(await sealed({ t: 'hello' }));
+  setInterval(async () => relay.publish(await sealed({ t: 'hb' })), 5000);
+  // reintentar el saludo hasta recibir el primer estado
+  const hello = setInterval(async () => {
+    if (state) return clearInterval(hello);
+    relay.publish(await sealed({ t: 'hello' }));
+  }, 2500);
+
+  const watchdog = setInterval(() => {
+    const age = Date.now() - lastState;
+    if (!state) {
+      status.textContent = 'Buscando la pantalla…';
+      dot.className = 'r-dot';
+      if (age > 20000 && Date.now() - startedAt > 20000) {
+        clearInterval(watchdog);
+        fail('La pantalla no responde');
+      }
+    } else if (age > 12000) {
+      dot.className = 'r-dot off';
+      status.textContent = 'Pantalla sin respuesta';
+    } else {
+      dot.className = 'r-dot on';
+      status.textContent = 'Conectado';
+    }
+  }, 1000);
+  const startedAt = Date.now();
 
   // ---------- interfaz ----------
   function group(title) {
@@ -162,5 +205,4 @@ export async function startRemote(hostId) {
     body.append(go);
   }
 
-  status.textContent = 'Conectando…';
 }

@@ -16,7 +16,7 @@ Barras · Radial · Espiral · Onda · Anillos · Cascada · Túnel · Plasma ·
 - **Texto:** mensaje grande que late con el beat; arriba, centro o abajo, o desplazándose. `T` lo muestra u oculta.
 - **Logo:** PNG o SVG propio, centrado o en una esquina, que late con los graves. Se guarda en el navegador (hasta ~1,5 MB). `L` lo muestra u oculta.
 - **Blackout y flash:** `B` apaga todo y `X` hace un destello.
-- **Control remoto:** el celular escanea el QR y maneja modos, escenas, color, texto y blackout. Usa WebRTC (PeerJS) y necesita internet en los dos equipos; solo hay que activarlo en el panel.
+- **Control remoto:** el celular escanea el QR y maneja modos, escenas, color, texto y blackout. Va por brokers MQTT públicos con los mensajes cifrados de punta a punta (la clave solo viaja en el QR), así que funciona con wifi o datos móviles; necesita internet en los dos equipos y se activa a mano en el panel.
 - **Grabar:** `R`. Graba esta pestaña (con video, texto, logo e incluso YouTube) más el sonido de la entrada, y descarga un `.webm`.
 
 ## Atajos
