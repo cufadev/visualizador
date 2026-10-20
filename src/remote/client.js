@@ -115,14 +115,25 @@ export async function startRemote(hostId) {
     return b;
   }
 
+  const note = el('div', 'r-toast');
+  note.setAttribute('role', 'status');
+  root.append(note);
+  let noteTimer = 0;
+  const say = (msg) => {
+    note.textContent = msg;
+    note.classList.add('show');
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => note.classList.remove('show'), 1600);
+  };
+
   // Barra fija abajo: lo que se usa en pleno show tiene que estar siempre a mano
   const dock = el('div', 'r-dock');
   const blackBtn = el('button', 'r-btn big', 'Blackout');
   blackBtn.type = 'button';
-  blackBtn.onclick = () => send('blackout', !state?.blackout);
+  blackBtn.onclick = () => { send('blackout', !state?.blackout); say(state?.blackout ? 'Blackout apagado' : 'Blackout'); };
   const flashBtn = el('button', 'r-btn big', 'Flash');
   flashBtn.type = 'button';
-  flashBtn.onclick = () => send('flash');
+  flashBtn.onclick = () => { send('flash'); say('Flash'); };
   dock.append(blackBtn, flashBtn);
   dock.hidden = true; // aparece con el primer estado recibido
   root.append(dock);
@@ -157,20 +168,20 @@ export async function startRemote(hostId) {
 
     if (s.scenes.length) {
       const g = group('Escenas');
-      const grid = el('div', 'r-grid');
-      s.scenes.forEach((name, i) => grid.append(toggleBtn(name, s.activeScene === i, () => send('scene', i))));
+      const grid = el('div', 'r-grid one');
+      s.scenes.forEach((name, i) => grid.append(toggleBtn(name, s.activeScene === i, () => { send('scene', i); say(name); })));
       g.append(grid);
       body.append(g);
     }
 
     const gm = group('Modo');
     const grid = el('div', 'r-grid');
-    s.modes.forEach((m) => grid.append(toggleBtn(m.name, s.mode === m.id, () => send('mode', m.id))));
+    s.modes.forEach((m) => grid.append(toggleBtn(m.name, s.mode === m.id, () => { send('mode', m.id); say(m.name); })));
     gm.append(grid);
     if (s.mode === 'milkdrop') {
       const nb = el('button', 'r-btn wide', 'Otro preset');
       nb.type = 'button';
-      nb.onclick = () => send('nextPreset');
+      nb.onclick = () => { send('nextPreset'); say('Otro preset'); };
       gm.append(nb);
     }
     body.append(gm);
@@ -184,7 +195,7 @@ export async function startRemote(hostId) {
       b.title = p.name;
       b.setAttribute('aria-label', p.name);
       b.setAttribute('aria-pressed', String(s.palette === p.id));
-      b.onclick = () => send('palette', p.id);
+      b.onclick = () => { send('palette', p.id); say(p.name); };
       chips.append(b);
     });
     gc.append(chips);

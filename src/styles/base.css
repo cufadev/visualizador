@@ -126,3 +126,6 @@ body.idle .chip, body.ui-off .chip { opacity: 0; transform: translateY(-8px); po
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* con un celular al mando, los avisos van solo al celular y la salida queda limpia */
+body.remote-live #toast, body.remote-live .chip { opacity: 0 !important; pointer-events: none; }

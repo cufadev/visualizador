@@ -2,7 +2,7 @@
 body.remote-mode { overflow: auto; background: var(--bg); }
 body.remote-mode > :not(#remote):not(script) { display: none !important; }
 #remote { display: none; }
-body.remote-mode #remote { display: block; min-height: 100vh; padding-bottom: calc(96px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
+body.remote-mode #remote { display: block; min-height: 100vh; padding-bottom: calc(112px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
 
 .r-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: rgba(8, 8, 10, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
 .r-head strong { letter-spacing: 0.22em; font-size: 15px; }
@@ -11,20 +11,22 @@ body.remote-mode #remote { display: block; min-height: 100vh; padding-bottom: ca
 .r-dot.off { background: var(--danger); }
 .r-status { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
 .r-body { padding: 12px 16px; display: grid; gap: 4px; }
+.r-input { min-height: 56px; font-size: 17px; }
 .r-group { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .r-group h2 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-.r-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.r-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.r-grid.one { grid-template-columns: 1fr; }
 .r-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.r-btn { user-select: none; -webkit-user-select: none; min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation; }
+.r-btn { user-select: none; -webkit-user-select: none; min-height: 68px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); color: var(--text); font: inherit; font-size: 17px; font-weight: 500; line-height: 1.2; text-wrap: balance; cursor: pointer; touch-action: manipulation; }
 .r-btn:active { transform: scale(0.97); }
-.r-btn.big { min-height: 64px; font-size: 16px; font-weight: 600; }
+.r-btn.big { min-height: 76px; font-size: 19px; font-weight: 600; }
 .r-btn.wide { width: 100%; margin-top: 10px; }
 .r-btn[aria-pressed='true'] { background: var(--accent-soft); border-color: rgba(255, 78, 1, 0.6); color: #fff; }
 /* barra fija con lo que se toca en pleno show */
 .r-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(8, 8, 10, 0.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
 .r-dock .r-btn.big[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.r-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.r-chip { height: 40px; border: 2px solid transparent; border-radius: 10px; cursor: pointer; }
+.r-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.r-chip { height: 60px; border: 3px solid transparent; border-radius: 14px; cursor: pointer; }
 .r-chip[aria-pressed='true'] { border-color: #fff; }
 .r-range { width: 100%; height: 36px; accent-color: var(--accent); }
 .r-input { width: 100%; height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0, 0, 0, 0.4); color: var(--text); font: inherit; font-size: 16px; }
@@ -33,3 +35,7 @@ body.remote-mode #remote { display: block; min-height: 100vh; padding-bottom: ca
 .r-readout { font-family: var(--mono); font-size: 12px; letter-spacing: 0; color: var(--text); text-transform: none; font-variant-numeric: tabular-nums; }
 .r-btn:focus-visible, .r-chip:focus-visible, .r-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .r-row .r-btn:only-child { grid-column: 1 / -1; }
+
+/* aviso breve de lo que se acaba de cambiar (la pantalla grande queda limpia) */
+.r-toast { position: fixed; left: 50%; top: 64px; z-index: 5; max-width: calc(100vw - 32px); padding: 10px 18px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 15px; font-weight: 600; opacity: 0; transform: translate(-50%, -8px); pointer-events: none; transition: opacity 0.2s var(--ease), transform 0.2s var(--ease); }
+.r-toast.show { opacity: 1; transform: translate(-50%, 0); }
