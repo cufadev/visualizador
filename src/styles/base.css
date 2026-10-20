@@ -35,7 +35,19 @@ body.idle { cursor: none; }
   border: 0;
 }
 #bg-video { object-fit: cover; z-index: 1; opacity: 0; transition: opacity 0.5s; }
-#bg-youtube { z-index: 1; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+/* el iframe mantiene 16:9: se agranda hasta cubrir la pantalla, como object-fit: cover */
+#bg-youtube {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width: max(100vw, 177.78vh);
+  height: max(100vh, 56.25vw);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
 #bg-video.on, #bg-youtube.on { opacity: 1; }
 #veil { z-index: 2; background: #000; opacity: 0; pointer-events: none; }
 #gl { z-index: 3; display: none; }
