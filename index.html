@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08080a">
+  <title>Visual — visualizador de audio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2308080a'/%3E%3Cg fill='%23ff4e01'%3E%3Crect x='6' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='11' y='8' width='3' height='16' rx='1.5'/%3E%3Crect x='16' y='11' width='3' height='10' rx='1.5'/%3E%3Crect x='21' y='6' width='3' height='20' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body>
+  <video id="bg-video" playsinline muted loop></video>
+  <iframe id="bg-youtube" title="Video de fondo (YouTube)" tabindex="-1"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <div id="veil"></div>
+  <canvas id="gl"></canvas>
+  <canvas id="fx"></canvas>
+
+  <div class="chip" id="chip" aria-live="polite">
+    <span class="dot" id="beat-dot"></span>
+    <span id="chip-src">Sin entrada</span>
+  </div>
+
+  <aside class="panel" id="panel" aria-label="Controles del visualizador">
+    <header class="panel-head">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <g fill="currentColor">
+          <rect x="4" y="13" width="4" height="8" rx="2"/>
+          <rect x="10" y="7" width="4" height="20" rx="2"/>
+          <rect x="16" y="11" width="4" height="12" rx="2"/>
+          <rect x="22" y="4" width="4" height="24" rx="2"/>
+        </g>
+      </svg>
+      <div class="brand">
+        <strong>VISUAL</strong>
+        <span>visualizador de audio</span>
+      </div>
+      <button type="button" class="icon-btn" id="btn-hide" title="Ocultar panel (H)" aria-label="Ocultar panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+    </header>
+
+    <div class="panel-body">
+      <section class="sec" data-sec="entrada">
+        <h2><span class="num">01</span>Entrada</h2>
+        <div class="field">
+          <label for="device">Dispositivo</label>
+          <select id="device"></select>
+        </div>
+        <div class="meter" aria-hidden="true"><i id="m-level"></i></div>
+        <div class="bands" aria-hidden="true">
+          <div><span>Graves</span><div class="meter thin"><i id="m-bass"></i></div></div>
+          <div><span>Medios</span><div class="meter thin"><i id="m-mid"></i></div></div>
+          <div><span>Agudos</span><div class="meter thin"><i id="m-high"></i></div></div>
+        </div>
+        <button type="button" class="btn ghost" id="btn-source">Probar con demo</button>
+      </section>
+
+      <section class="sec" data-sec="visual">
+        <h2><span class="num">02</span>Visualización</h2>
+        <div class="cards" id="modes" role="group" aria-label="Modo de visualización"></div>
+        <div class="milk" id="milk" hidden>
+          <div class="field">
+            <label for="preset">Preset Milkdrop</label>
+            <select id="preset"></select>
+          </div>
+          <div class="row">
+            <button type="button" class="btn ghost" id="btn-next">Otro al azar</button>
+            <label class="check"><input type="checkbox" id="milk-auto"><span>Cambiar solo</span></label>
+          </div>
+          <p class="hint">En este modo el video de fondo no se ve.</p>
+        </div>
+      </section>
+
+      <section class="sec" data-sec="respuesta">
+        <h2><span class="num">03</span>Respuesta</h2>
+        <div class="field">
+          <label for="sens">Sensibilidad <output id="sens-out"></output></label>
+          <input type="range" id="sens" min="0.2" max="4" step="0.1">
+        </div>
+        <div class="field">
+          <label for="smooth">Suavizado <output id="smooth-out"></output></label>
+          <input type="range" id="smooth" min="0" max="0.9" step="0.05">
+        </div>
+      </section>
+
+      <section class="sec" data-sec="color">
+        <h2><span class="num">04</span>Color</h2>
+        <div class="swatches" id="palettes" role="group" aria-label="Paleta de color"></div>
+      </section>
+
+      <section class="sec" data-sec="fondo">
+        <h2><span class="num">05</span>Fondo</h2>
+        <div class="seg" id="bg-seg" role="group" aria-label="Fuente del fondo">
+          <button type="button" data-source="none">Ninguno</button>
+          <button type="button" data-source="local">Archivo</button>
+          <button type="button" data-source="youtube">YouTube</button>
+        </div>
+        <div class="field" id="bg-local" hidden>
+          <input type="file" id="video-file" accept="video/*" hidden>
+          <button type="button" class="btn ghost" id="btn-file">Elegir video…</button>
+          <p class="hint" id="file-name">Sin archivo. El video va en loop y sin sonido.</p>
+        </div>
+        <div class="field" id="bg-yt" hidden>
+          <label for="yt-url">Link de YouTube</label>
+          <div class="row">
+            <input type="text" id="yt-url" placeholder="https://youtu.be/…" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn" id="btn-yt">Cargar</button>
+          </div>
+          <p class="hint" id="yt-hint">Necesita internet. En vivo conviene un archivo local.</p>
+        </div>
+        <div class="field">
+          <label for="dim">Oscurecer fondo <output id="dim-out"></output></label>
+          <input type="range" id="dim" min="0" max="0.9" step="0.05">
+        </div>
+      </section>
+
+      <section class="sec" data-sec="atajos">
+        <h2><span class="num">06</span>Atajos</h2>
+        <div class="keys">
+      <span><kbd>H</kbd> panel</span>
+      <span><kbd>M</kbd> modo</span>
+      <span><kbd>1</kbd>–<kbd>7</kbd> directo</span>
+      <span><kbd>C</kbd> color</span>
+      <span><kbd>V</kbd> fondo</span>
+      <span><kbd>N</kbd> preset</span>
+      <span><kbd>F</kbd> pantalla completa</span>
+      <span><kbd>+</kbd><kbd>−</kbd> sensibilidad</span>
+    </div>
+      </section>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="start" id="start">
+    <div class="start-card" role="dialog" aria-modal="true" aria-labelledby="start-title">
+      <svg class="mark big" viewBox="0 0 32 32" aria-hidden="true">
+        <g fill="currentColor">
+          <rect x="4" y="13" width="4" height="8" rx="2"/>
+          <rect x="10" y="7" width="4" height="20" rx="2"/>
+          <rect x="16" y="11" width="4" height="12" rx="2"/>
+          <rect x="22" y="4" width="4" height="24" rx="2"/>
+        </g>
+      </svg>
+      <h1 id="start-title">VISUAL</h1>
+      <p class="lead">Elegí la entrada de audio y empezá. El navegador te va a pedir permiso para usar el micrófono.</p>
+      <div class="field">
+        <label for="start-device">Entrada de audio</label>
+        <select id="start-device"><option value="">Predeterminada</option></select>
+      </div>
+      <p class="error" id="start-error" role="alert" hidden></p>
+      <button type="button" class="btn primary" id="btn-start">Empezar con el micrófono</button>
+      <button type="button" class="btn ghost" id="btn-demo">Probar con sonido de demo</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

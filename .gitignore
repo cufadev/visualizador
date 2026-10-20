@@ -1,0 +1,5 @@
+node_modules/
+dist/
+# la v1 original queda solo en disco como respaldo
+visual-test-master/
+visual-test-master.zip
