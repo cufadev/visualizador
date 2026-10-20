@@ -16,7 +16,7 @@ export function createRecordPanel({ engine }) {
         document.body.classList.add('ui-off'); // que el panel no salga en el video
         const paint = () => {
           const s = recorder.seconds;
-          btn.textContent = `● Grabando ${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')} (R para cortar)`;
+          btn.textContent = `Grabando ${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')} · R para cortar`;
         };
         paint();
         tick = setInterval(paint, 1000);

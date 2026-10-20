@@ -35,6 +35,7 @@ export async function startRemote(hostId) {
   };
 
   function fail(msg, hint) {
+    root.querySelector('.r-dock')?.remove();
     dot.className = 'r-dot off';
     status.textContent = msg;
     body.replaceChildren();
@@ -108,28 +109,51 @@ export async function startRemote(hostId) {
   }
   function toggleBtn(label, on, onClick, cls = '') {
     const b = el('button', `r-btn ${cls}`, label);
+    b.type = 'button';
     b.setAttribute('aria-pressed', String(!!on));
     b.onclick = onClick;
     return b;
   }
 
-  let typing = false; // no redibujar mientras se escribe, para no perder el foco
+  // Barra fija abajo: lo que se usa en pleno show tiene que estar siempre a mano
+  const dock = el('div', 'r-dock');
+  const blackBtn = el('button', 'r-btn big', 'Blackout');
+  blackBtn.type = 'button';
+  blackBtn.onclick = () => send('blackout', !state?.blackout);
+  const flashBtn = el('button', 'r-btn big', 'Flash');
+  flashBtn.type = 'button';
+  flashBtn.onclick = () => send('flash');
+  dock.append(blackBtn, flashBtn);
+  dock.hidden = true; // aparece con el primer estado recibido
+  root.append(dock);
+
+  // vibracion corta en cada toque (donde el navegador la permita)
+  root.addEventListener('click', (e) => e.target.closest('.r-btn, .r-chip') && navigator.vibrate?.(10));
+
+  // No redibujar mientras el dedo esta en un slider o se escribe: el estado vuelve de la
+  // pantalla y reemplazar los controles a mitad del gesto lo corta.
+  let typing = false;
+  let dragging = false;
+  let pending = 0;
+  const busy = () => typing || dragging;
+  const renderSoon = (ms = 250) => {
+    clearTimeout(pending);
+    pending = setTimeout(() => (busy() ? renderSoon(ms) : render()), ms);
+  };
+  root.addEventListener('pointerup', () => {
+    if (dragging) {
+      dragging = false;
+      renderSoon(150);
+    }
+  });
+  root.addEventListener('pointercancel', () => (dragging = false));
 
   function render() {
-    if (typing) return;
+    if (busy()) return renderSoon();
     const s = state;
+    dock.hidden = false;
     body.replaceChildren();
-
-    const quick = el('div', 'r-quick');
-    quick.append(
-      toggleBtn('Blackout', s.blackout, () => send('blackout', !s.blackout), 'big'),
-      (() => {
-        const b = el('button', 'r-btn big', 'Flash');
-        b.onclick = () => send('flash');
-        return b;
-      })(),
-    );
-    body.append(quick);
+    blackBtn.setAttribute('aria-pressed', String(!!s.blackout));
 
     if (s.scenes.length) {
       const g = group('Escenas');
@@ -145,6 +169,7 @@ export async function startRemote(hostId) {
     gm.append(grid);
     if (s.mode === 'milkdrop') {
       const nb = el('button', 'r-btn wide', 'Otro preset');
+      nb.type = 'button';
       nb.onclick = () => send('nextPreset');
       gm.append(nb);
     }
@@ -154,7 +179,9 @@ export async function startRemote(hostId) {
     const chips = el('div', 'r-chips');
     s.palettes.forEach((p) => {
       const b = el('button', 'r-chip');
+      b.type = 'button';
       b.style.background = p.css;
+      b.title = p.name;
       b.setAttribute('aria-label', p.name);
       b.setAttribute('aria-pressed', String(s.palette === p.id));
       b.onclick = () => send('palette', p.id);
@@ -163,11 +190,16 @@ export async function startRemote(hostId) {
     gc.append(chips);
     body.append(gc);
 
-    const gs = group(`Sensibilidad ${s.sensitivity.toFixed(1)}×`);
+    const gs = group('Sensibilidad');
+    const readout = el('output', 'r-readout', `${s.sensitivity.toFixed(1)}×`);
+    gs.firstChild.append(readout);
     const range = el('input', 'r-range');
     Object.assign(range, { type: 'range', min: '0.2', max: '4', step: '0.1', value: String(s.sensitivity) });
+    range.setAttribute('aria-label', 'Sensibilidad');
+    range.onpointerdown = () => (dragging = true);
     let last = 0;
     range.oninput = () => {
+      readout.textContent = `${Number(range.value).toFixed(1)}×`;
       const now = Date.now();
       if (now - last > 80) {
         last = now;
@@ -181,28 +213,43 @@ export async function startRemote(hostId) {
     const gt = group('Texto en pantalla');
     const input = el('input', 'r-input');
     Object.assign(input, { type: 'text', maxLength: 120, placeholder: 'Escribí algo…', value: s.text });
+    input.setAttribute('aria-label', 'Texto en pantalla');
     input.onfocus = () => (typing = true);
     input.onblur = () => {
       typing = false;
+      renderSoon(400); // con demora: si el toque cae en "Enviar", el click tiene que llegar primero
     };
     const row = el('div', 'r-row');
-    const sendBtn = el('button', 'r-btn', 'Mostrar');
+    const sendBtn = el('button', 'r-btn', 'Enviar');
+    sendBtn.type = 'button';
     sendBtn.onclick = () => {
       send('text', input.value);
       send('textOn', true);
+      input.blur();
     };
-    row.append(sendBtn, toggleBtn('Ocultar', !s.textOn, () => send('textOn', false)));
+    row.append(sendBtn, toggleBtn('Texto visible', s.textOn, () => send('textOn', !s.textOn)));
     gt.append(input, row);
     body.append(gt);
 
+    const layers = [];
+    if (s.hasLogo) layers.push(toggleBtn('Logo', s.logoOn, () => send('logoOn', !s.logoOn)));
+    layers.push(toggleBtn('Fondo de video', s.bgOn, () => send('bgToggle')));
     const go = group('Capas');
     const row2 = el('div', 'r-row');
-    if (s.hasLogo) row2.append(toggleBtn('Logo', s.logoOn, () => send('logoOn', !s.logoOn)));
-    row2.append(el('span'));
-    const bg = toggleBtn('Fondo de video', s.bgOn, () => send('bgToggle'));
-    row2.append(bg);
+    layers.forEach((b) => row2.append(b));
     go.append(row2);
     body.append(go);
   }
 
+  // mantener la pantalla del celular encendida mientras dura el show
+  let wake = null;
+  const keepAwake = async () => {
+    try {
+      wake = await navigator.wakeLock?.request('screen');
+    } catch {
+      // no disponible o rechazado: el celular se apagara por su cuenta
+    }
+  };
+  keepAwake();
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && keepAwake());
 }

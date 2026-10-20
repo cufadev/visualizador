@@ -104,7 +104,7 @@ export function createStage({ engine, renderer }) {
       if (frameCount % 6 === 0) {
         const c = renderer.frame.color;
         span.style.color = c(0.92);
-        span.style.textShadow = `0 0 0.35em ${c(0.55)}, 0 0 1em ${c(0.35)}`;
+        span.style.textShadow = '0 0.04em 0.5em rgba(0, 0, 0, 0.65), 0 0.02em 0.12em rgba(0, 0, 0, 0.5)';
       }
     }
     if (!logo.hidden) {

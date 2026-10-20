@@ -64,7 +64,6 @@ body.idle .panel, body.ui-off .panel {
   text-transform: uppercase;
   color: var(--muted);
 }
-.sec h2 .num { font-family: var(--mono); font-weight: 500; color: var(--accent); letter-spacing: 0; }
 
 .field { margin-top: 12px; }
 .field:first-of-type { margin-top: 0; }
@@ -94,7 +93,8 @@ select, input[type='text'] {
 }
 select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 17px) 16px, calc(100% - 12px) 16px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 30px; }
 select option { background: #14141a; color: var(--text); }
-input[type='text']::placeholder { color: #5d5d69; }
+input[type='text']::placeholder { color: #6b6b78; }
+select:focus-visible, input[type='text']:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
 .btn {
   flex: none;
@@ -112,6 +112,7 @@ input[type='text']::placeholder { color: #5d5d69; }
 }
 .btn:hover { background: rgba(255, 255, 255, 0.14); }
 .btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 .btn.ghost { width: 100%; background: var(--raised); margin-top: 12px; }
 .btn.primary { width: 100%; background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; height: 44px; }
 .btn.primary:hover { background: #ff6a26; }
@@ -218,10 +219,10 @@ input[type='range']::-moz-range-thumb { width: 15px; height: 15px; border: 0; bo
   transition: color 0.2s;
 }
 .sec-toggle:hover { color: var(--text); }
-.sec-toggle .num { font-family: var(--mono); font-weight: 500; color: var(--accent); letter-spacing: 0; }
 .sec-toggle .chev { margin-left: auto; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s var(--ease); }
 .sec.collapsed .chev { transform: rotate(-90deg); }
-.sec-body { display: grid; grid-template-rows: 1fr; margin-top: 12px; transition: grid-template-rows 0.3s var(--ease), margin-top 0.3s var(--ease), opacity 0.25s; }
+.sec-body { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.3s var(--ease), opacity 0.25s; }
+.sec-pad { padding-top: 12px; }
 .sec-inner { min-height: 0; overflow: hidden; }
 .sec.collapsed { padding-bottom: 14px; }
-.sec.collapsed .sec-body { grid-template-rows: 0fr; margin-top: 0; opacity: 0; }
+.sec.collapsed .sec-body { grid-template-rows: 0fr; opacity: 0; }

@@ -47,7 +47,7 @@
 
     <div class="panel-body">
       <section class="sec" data-sec="entrada">
-        <h2><span class="num">01</span>Entrada</h2>
+        <h2>Entrada</h2>
         <div class="field">
           <label for="device">Dispositivo</label>
           <select id="device"></select>
@@ -62,7 +62,7 @@
       </section>
 
       <section class="sec" data-sec="visual">
-        <h2><span class="num">02</span>Visualización</h2>
+        <h2>Visualización</h2>
         <div class="cards" id="modes" role="group" aria-label="Modo de visualización"></div>
         <div class="milk" id="milk" hidden>
           <div class="field">
@@ -78,7 +78,7 @@
       </section>
 
       <section class="sec" data-sec="escenas">
-        <h2><span class="num">03</span>Escenas</h2>
+        <h2>Escenas</h2>
         <div class="scenes" id="scenes"></div>
         <p class="hint" id="scenes-empty">Guardá la combinación actual (modo, color, texto, logo, fondo) y volvé a ella con <kbd>⇧</kbd>+<kbd>1</kbd>…<kbd>9</kbd>.</p>
         <div class="row field">
@@ -88,7 +88,7 @@
       </section>
 
       <section class="sec" data-sec="respuesta">
-        <h2><span class="num">04</span>Respuesta</h2>
+        <h2>Respuesta</h2>
         <div class="field">
           <label for="sens">Sensibilidad <output id="sens-out"></output></label>
           <input type="range" id="sens" min="0.2" max="4" step="0.1">
@@ -100,12 +100,12 @@
       </section>
 
       <section class="sec" data-sec="color">
-        <h2><span class="num">05</span>Color</h2>
+        <h2>Color</h2>
         <div class="swatches" id="palettes" role="group" aria-label="Paleta de color"></div>
       </section>
 
       <section class="sec" data-sec="fondo">
-        <h2><span class="num">06</span>Fondo</h2>
+        <h2>Fondo</h2>
         <div class="seg" id="bg-seg" role="group" aria-label="Fuente del fondo">
           <button type="button" data-source="none">Ninguno</button>
           <button type="button" data-source="local">Archivo</button>
@@ -131,7 +131,7 @@
       </section>
 
       <section class="sec" data-sec="texto">
-        <h2><span class="num">07</span>Texto</h2>
+        <h2>Texto</h2>
         <div class="field">
           <label for="text-input">Mensaje</label>
           <div class="row">
@@ -156,7 +156,7 @@
         </div>
       </section>
       <section class="sec" data-sec="logo">
-        <h2><span class="num">08</span>Logo</h2>
+        <h2>Logo</h2>
         <input type="file" id="logo-file" accept="image/*" hidden>
         <div class="row">
           <button type="button" class="btn ghost" id="btn-logo">Elegir imagen…</button>
@@ -187,23 +187,23 @@
         </div>
       </section>
       <section class="sec" data-sec="remoto">
-        <h2><span class="num">09</span>Control remoto</h2>
-        <p class="hint" style="margin-top:0">Manejá modos, escenas y texto desde el celular. Escaneá el QR con la cámara del celular. Anda con wifi o datos móviles, solo necesita internet en los dos. Los mensajes van cifrados.</p>
+        <h2>Control remoto</h2>
+        <p class="hint" style="margin-top:0">Escaneá el QR con el celular y manejá modos, escenas y texto desde ahí. Funciona con wifi o datos móviles, y los mensajes van cifrados.</p>
         <button type="button" class="btn ghost" id="btn-remote">Activar control remoto</button>
         <div class="remote-box" id="remote-box" hidden>
           <img id="remote-qr" alt="Código QR para conectar el celular" width="220" height="220">
-          <p class="hint" id="remote-count">Esperando celulares…</p>
+          <div class="status-row"><span class="led" id="remote-led" data-state="off"></span><p id="remote-count">Esperando celulares…</p></div>
           <button type="button" class="btn ghost" id="btn-remote-copy">Copiar link</button>
         </div>
       </section>
       <section class="sec" data-sec="grabar">
-        <h2><span class="num">10</span>Grabar</h2>
-        <p class="hint" style="margin-top:0">Graba lo que se ve (con video, texto y logo) más el sonido de la entrada, y lo guarda como .webm. Al empezar, elegí <b>esta pestaña</b> y el panel se oculta solo. Para cortar: <kbd>R</kbd>.</p>
+        <h2>Grabar</h2>
+        <p class="hint" style="margin-top:0">Guarda un .webm con lo que se ve (video, texto y logo) y el sonido de la entrada. Al empezar, elegí <b>esta pestaña</b>; el panel se oculta solo. Para cortar: <kbd>R</kbd>.</p>
         <button type="button" class="btn ghost" id="btn-rec">Empezar a grabar</button>
       </section>
 
       <section class="sec" data-sec="atajos">
-        <h2><span class="num">11</span>Atajos</h2>
+        <h2>Atajos</h2>
         <div class="keys">
       <span><kbd>H</kbd> panel</span>
       <span><kbd>M</kbd> modo</span>
@@ -212,7 +212,7 @@
       <span><kbd>V</kbd> fondo</span>
       <span><kbd>N</kbd> preset</span>
       <span><kbd>F</kbd> pantalla completa</span>
-          <span><kbd>⇧</kbd><kbd>1</kbd>–<kbd>9</kbd> escena</span>
+          <span><kbd>Mayús</kbd><kbd>1</kbd>–<kbd>9</kbd> escena</span>
           <span><kbd>,</kbd><kbd>.</kbd> escena ant./sig.</span>
           <span><kbd>T</kbd> texto</span>
           <span><kbd>L</kbd> logo</span>

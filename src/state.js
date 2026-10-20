@@ -12,7 +12,7 @@ const defaults = {
   deviceId: '',
   milkAuto: true,
   milkPreset: '',
-  collapsed: ['respuesta', 'color', 'fondo', 'texto', 'logo', 'remoto', 'grabar', 'atajos'],
+  collapsed: ['entrada', 'respuesta', 'color', 'fondo', 'texto', 'logo', 'remoto', 'grabar', 'atajos'],
   text: '',
   textOn: false,
   textSize: 8, // en vw

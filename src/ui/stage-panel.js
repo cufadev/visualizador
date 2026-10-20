@@ -18,7 +18,7 @@ export function createStagePanel({ stage }) {
   on('textOn', syncTextBtn);
   on('text', (v) => input.value !== v && (input.value = v));
   syncTextBtn();
-  bindRange('#text-size', 'textSize', (v) => `${v}`);
+  bindRange('#text-size', 'textSize', (v) => `${Math.round((v / 22) * 100)}%`);
   bindSeg('#text-pos', 'textPos');
   bindCheck('#text-pulse', 'textPulse');
   bindCheck('#text-marquee', 'textMarquee');

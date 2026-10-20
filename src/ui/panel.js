@@ -224,7 +224,10 @@ export function createPanel({ engine, renderer, background }) {
     body.className = 'sec-body';
     const inner = document.createElement('div');
     inner.className = 'sec-inner';
-    while (h2.nextSibling) inner.append(h2.nextSibling);
+    const pad = document.createElement('div');
+    pad.className = 'sec-pad'; // el espacio va adentro de la zona recortada, asi no se anima el margen
+    while (h2.nextSibling) pad.append(h2.nextSibling);
+    inner.append(pad);
     body.append(inner);
     sec.append(body);
     h2.innerHTML = `<button type="button" class="sec-toggle">${label}<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>`;

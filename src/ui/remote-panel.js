@@ -65,6 +65,7 @@ export function createRemotePanel({ renderer, engine, stage, background, panel, 
     if (!host.active) return;
     const who = phones ? `${phones} celular${phones > 1 ? 'es' : ''} conectado${phones > 1 ? 's' : ''}` : 'Esperando celulares…';
     count.textContent = servers ? `${who} · enlace activo` : 'Reconectando con el enlace…';
+    $('#remote-led').dataset.state = !servers ? 'wait' : phones ? 'on' : 'off';
   }
 
   WATCH.forEach((k) => on(k, () => host.push()));
