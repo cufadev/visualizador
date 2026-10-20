@@ -27,7 +27,7 @@ body {
 body.idle { cursor: none; }
 
 /* capas: video -> velo -> milkdrop -> canvas 2D */
-#bg-video, #bg-youtube, #gl, #sh, #fx, #veil {
+#bg-video, #bg-youtube, #gl, #sh, #fx, #xfade, #veil {
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -50,11 +50,12 @@ body.idle { cursor: none; }
 }
 #bg-video.on, #bg-youtube.on { opacity: 1; }
 #veil { z-index: 2; background: #000; opacity: 0; pointer-events: none; }
-#gl { z-index: 3; display: none; }
-#gl.on, #sh.on { display: block; }
-#sh { z-index: 3; display: none; }
+/* las tres capas de dibujo se funden entre si al cambiar de modo (misma duracion y curva que el color) */
+#gl, #sh, #fx { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s var(--ease), visibility 0s 0.6s; }
+#gl.on, #sh.on, #fx.on { opacity: 1; visibility: visible; transition: opacity 0.6s var(--ease), visibility 0s; }
+#gl, #sh { z-index: 3; }
 #fx { z-index: 4; }
-#fx.off { display: none; }
+#xfade { z-index: 4; opacity: 0; pointer-events: none; transition: opacity 0.6s var(--ease); }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 ::selection { background: var(--accent); color: var(--on-accent); }

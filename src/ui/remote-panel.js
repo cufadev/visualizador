@@ -50,8 +50,21 @@ export function createRemotePanel({ renderer, engine, stage, background, panel, 
       }
     },
     onCount: (n) => {
+      const was = phones;
       phones = n;
       paintStatus();
+      // con un celular al mando el panel de la pantalla sobra: se esconde para dejar la salida limpia
+      if (n > 0 && was === 0) {
+        hiddenByRemote = !document.body.classList.contains('ui-off');
+        if (hiddenByRemote) {
+          document.body.classList.add('ui-off');
+          toast('Control remoto conectado · H para mostrar el panel');
+        }
+      } else if (n === 0 && was > 0 && hiddenByRemote) {
+        // se fue el último celular: se devuelve el panel (salvo que se esté grabando)
+        hiddenByRemote = false;
+        if (!document.body.classList.contains('recording')) document.body.classList.remove('ui-off');
+      }
     },
     onStatus: (up) => {
       servers = up;
@@ -61,6 +74,7 @@ export function createRemotePanel({ renderer, engine, stage, background, panel, 
 
   let phones = 0;
   let servers = 0;
+  let hiddenByRemote = false;
   function paintStatus() {
     if (!host.active) return;
     const who = phones ? `${phones} celular${phones > 1 ? 'es' : ''} conectado${phones > 1 ? 's' : ''}` : 'Esperando celulares…';

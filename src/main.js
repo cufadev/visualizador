@@ -30,6 +30,7 @@ function boot() {
     fxCanvas: $('#fx'),
     glCanvas: $('#gl'),
     shCanvas: $('#sh'),
+    xfadeCanvas: $('#xfade'),
     engine,
     onMilkError: (err) => console.error('Milkdrop:', err),
   });

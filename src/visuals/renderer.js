@@ -12,11 +12,19 @@ import { createMilkdrop } from './modes/milkdrop.js';
 import { getPalette, getPaletteRGBA } from './palettes.js';
 import { ShaderSurface } from './shader.js';
 
+// Duracion y curva compartidas por la transicion de modo (CSS, ver --ease) y la de color
+const FADE_MS = 600;
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
 export class Renderer {
-  constructor({ fxCanvas, glCanvas, shCanvas, engine, onMilkError }) {
+  constructor({ fxCanvas, glCanvas, shCanvas, xfadeCanvas, engine, onMilkError }) {
     this.fx = fxCanvas;
     this.gl = glCanvas;
     this.shCanvas = shCanvas;
+    this.xfade = xfadeCanvas;
+    this.surface = '2d'; // cual de las tres capas esta activa: '2d' | 'sh' | 'gl'
+    this.fx.classList.add('on');
     this.sh = new ShaderSurface(shCanvas);
     this.g = fxCanvas.getContext('2d');
     this.engine = engine;
@@ -42,6 +50,15 @@ export class Renderer {
       bass: 0, mid: 0, high: 0, level: 0, beat: 0, beatFired: false,
       color: getPalette('brasa'),
     };
+    // transicion de paleta: se mezcla la tabla vieja con la nueva cuadro a cuadro
+    this.palCurrent = getPaletteRGBA('brasa');
+    this.palFrom = this.palCurrent;
+    this.palTarget = this.palCurrent;
+    this.palLut = new Array(256).fill('rgb(0 0 0)');
+    this.palT = 1;
+    this.palId = 'brasa';
+    this.palStarted = false;
+    this.blendColor = (v) => this.palLut[v <= 0 ? 0 : v >= 1 ? 255 : (v * 255) | 0];
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -60,8 +77,50 @@ export class Renderer {
   }
 
   setPalette(id) {
-    this.frame.color = getPalette(id);
-    this.sh.setPalette(getPaletteRGBA(id));
+    const target = getPaletteRGBA(id);
+    this.palId = id;
+    // la primera vez (al arrancar) y con movimiento reducido se cambia de golpe
+    if (!this.palStarted || reducedMotion()) {
+      this.palStarted = true;
+      this.palCurrent = target.slice();
+      this.palTarget = target;
+      this.palT = 1;
+      this.frame.color = getPalette(id);
+      this.sh.setPalette(target);
+      return;
+    }
+    this.palFrom = this.palCurrent.slice(); // parte de lo que se ve ahora, aunque haya otra transicion en curso
+    this.palTarget = target;
+    this.palT = 0;
+    this.frame.color = this.blendColor;
+  }
+
+  _tickPalette(dt) {
+    if (this.palT >= 1) return;
+    this.palT = Math.min(1, this.palT + (dt * 1000) / FADE_MS);
+    const k = easeOutExpo(this.palT);
+    const cur = this.palCurrent;
+    for (let i = 0; i < 1024; i++) cur[i] = this.palFrom[i] + (this.palTarget[i] - this.palFrom[i]) * k;
+    if (this.palT >= 1) {
+      this.frame.color = getPalette(this.palId); // vuelve a la tabla exacta
+      this.sh.setPalette(this.palTarget);
+      return;
+    }
+    for (let i = 0; i < 256; i++) this.palLut[i] = `rgb(${cur[i * 4] | 0} ${cur[i * 4 + 1] | 0} ${cur[i * 4 + 2] | 0})`;
+    this.sh.setPalette(cur);
+  }
+
+  // Deja una copia del cuadro actual encima y la desvanece mientras el modo nuevo empieza debajo
+  _snapshot(canvas) {
+    const x = this.xfade;
+    x.width = canvas.width;
+    x.height = canvas.height;
+    x.getContext('2d').drawImage(canvas, 0, 0);
+    x.style.transition = 'none';
+    x.style.opacity = '1';
+    void x.offsetWidth; // aplica el estado inicial antes de animar
+    x.style.transition = '';
+    x.style.opacity = '0';
   }
 
   setSensitivity(v) {
@@ -88,10 +147,17 @@ export class Renderer {
       mode.resize(this.frame.w, this.frame.h);
     }
     mode.reset?.();
+    const next = mode.gl ? 'gl' : mode.frag ? 'sh' : '2d';
+    const animate = this.modeStarted && !reducedMotion();
+    // misma capa (barras -> radial, tunel -> plasma): no hay otra capa para fundir, se funde una copia
+    if (animate && next === this.surface && next !== 'gl') this._snapshot(next === 'sh' ? this.shCanvas : this.fx);
     this.mode = mode;
-    this.gl.classList.toggle('on', !!mode.gl);
-    this.shCanvas.classList.toggle('on', !!mode.frag);
-    this.fx.classList.toggle('off', !!mode.gl || !!mode.frag);
+    // capas distintas: cada una anima su opacidad por CSS, una entra mientras la otra sale
+    this.gl.classList.toggle('on', next === 'gl');
+    this.shCanvas.classList.toggle('on', next === 'sh');
+    this.fx.classList.toggle('on', next === '2d');
+    this.surface = next;
+    this.modeStarted = true;
     this.g.clearRect(0, 0, this.frame.w, this.frame.h);
     return true;
   }
@@ -101,6 +167,7 @@ export class Renderer {
     this.last = now;
     const e = this.engine;
     e.update(dt, now);
+    this._tickPalette(dt);
 
     if (this.mode.gl) {
       this.mode.render(this.milkAuto);

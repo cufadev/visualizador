@@ -29,7 +29,7 @@ export class ShaderSurface {
 
   init() {
     if (this.gl) return true;
-    const gl = this.canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
+    const gl = this.canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
     if (!gl) return false;
     this.gl = gl;
     const buf = gl.createBuffer();
