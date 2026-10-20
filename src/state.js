@@ -1,5 +1,5 @@
 // Ajustes de la app con persistencia en localStorage y suscripcion por clave.
-const STORAGE_KEY = 'visual:v2';
+const STORAGE_KEY = 'visual:v3';
 
 const defaults = {
   mode: 'bars',
@@ -12,7 +12,20 @@ const defaults = {
   deviceId: '',
   milkAuto: true,
   milkPreset: '',
-  collapsed: ['respuesta', 'color', 'fondo', 'atajos'],
+  collapsed: ['respuesta', 'color', 'fondo', 'texto', 'logo', 'remoto', 'grabar', 'atajos'],
+  text: '',
+  textOn: false,
+  textSize: 8, // en vw
+  textPos: 'center', // 'top' | 'center' | 'bottom'
+  textPulse: true,
+  textMarquee: false,
+  logoOn: false,
+  logoSize: 24, // en vh
+  logoPos: 'center', // 'center' | 'tl' | 'tr' | 'bl' | 'br'
+  logoOpacity: 1,
+  logoPulse: true,
+  scenes: [],
+  activeScene: -1,
 };
 
 function load() {

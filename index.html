@@ -14,7 +14,12 @@
           referrerpolicy="strict-origin-when-cross-origin"></iframe>
   <div id="veil"></div>
   <canvas id="gl"></canvas>
+  <canvas id="sh"></canvas>
   <canvas id="fx"></canvas>
+  <div class="stage-text" id="stage-text" data-pos="center" hidden><div class="st-track"><span></span></div></div>
+  <img class="logo" id="logo" alt="" data-pos="center" hidden>
+  <div id="flash"></div>
+  <div id="blackout"></div>
 
   <div class="chip" id="chip" aria-live="polite">
     <span class="dot" id="beat-dot"></span>
@@ -72,8 +77,18 @@
         </div>
       </section>
 
+      <section class="sec" data-sec="escenas">
+        <h2><span class="num">03</span>Escenas</h2>
+        <div class="scenes" id="scenes"></div>
+        <p class="hint" id="scenes-empty">Guardá la combinación actual (modo, color, texto, logo, fondo) y volvé a ella con <kbd>⇧</kbd>+<kbd>1</kbd>…<kbd>9</kbd>.</p>
+        <div class="row field">
+          <input type="text" id="scene-name" placeholder="Nombre (ej. Tema 1)" maxlength="24" autocomplete="off">
+          <button type="button" class="btn" id="btn-scene-save">Guardar</button>
+        </div>
+      </section>
+
       <section class="sec" data-sec="respuesta">
-        <h2><span class="num">03</span>Respuesta</h2>
+        <h2><span class="num">04</span>Respuesta</h2>
         <div class="field">
           <label for="sens">Sensibilidad <output id="sens-out"></output></label>
           <input type="range" id="sens" min="0.2" max="4" step="0.1">
@@ -85,12 +100,12 @@
       </section>
 
       <section class="sec" data-sec="color">
-        <h2><span class="num">04</span>Color</h2>
+        <h2><span class="num">05</span>Color</h2>
         <div class="swatches" id="palettes" role="group" aria-label="Paleta de color"></div>
       </section>
 
       <section class="sec" data-sec="fondo">
-        <h2><span class="num">05</span>Fondo</h2>
+        <h2><span class="num">06</span>Fondo</h2>
         <div class="seg" id="bg-seg" role="group" aria-label="Fuente del fondo">
           <button type="button" data-source="none">Ninguno</button>
           <button type="button" data-source="local">Archivo</button>
@@ -115,21 +130,102 @@
         </div>
       </section>
 
+      <section class="sec" data-sec="texto">
+        <h2><span class="num">07</span>Texto</h2>
+        <div class="field">
+          <label for="text-input">Mensaje</label>
+          <div class="row">
+            <input type="text" id="text-input" placeholder="Nombre de la banda, tema…" maxlength="120" autocomplete="off">
+            <button type="button" class="btn" id="btn-text">Mostrar</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="text-size">Tamaño <output></output></label>
+          <input type="range" id="text-size" min="3" max="22" step="1">
+        </div>
+        <div class="field">
+          <div class="seg" id="text-pos" role="group" aria-label="Posición del texto">
+            <button type="button" data-v="top">Arriba</button>
+            <button type="button" data-v="center">Centro</button>
+            <button type="button" data-v="bottom">Abajo</button>
+          </div>
+        </div>
+        <div class="field checks">
+          <label class="check"><input type="checkbox" id="text-pulse"><span>Late con el beat</span></label>
+          <label class="check"><input type="checkbox" id="text-marquee"><span>Desplazar</span></label>
+        </div>
+      </section>
+      <section class="sec" data-sec="logo">
+        <h2><span class="num">08</span>Logo</h2>
+        <input type="file" id="logo-file" accept="image/*" hidden>
+        <div class="row">
+          <button type="button" class="btn ghost" id="btn-logo">Elegir imagen…</button>
+          <button type="button" class="btn ghost" id="btn-logo-clear" hidden>Quitar</button>
+        </div>
+        <p class="hint" id="logo-hint">PNG con fondo transparente o SVG. Se queda guardado en este navegador.</p>
+        <div class="field checks">
+          <label class="check"><input type="checkbox" id="logo-on"><span>Mostrar</span></label>
+          <label class="check"><input type="checkbox" id="logo-pulse"><span>Late con los graves</span></label>
+        </div>
+        <div class="field">
+          <label for="logo-size">Tamaño <output></output></label>
+          <input type="range" id="logo-size" min="6" max="80" step="1">
+        </div>
+        <div class="field">
+          <label for="logo-opacity">Opacidad <output></output></label>
+          <input type="range" id="logo-opacity" min="0.1" max="1" step="0.05">
+        </div>
+        <div class="field">
+          <label for="logo-pos">Posición</label>
+          <select id="logo-pos">
+            <option value="center">Centro</option>
+            <option value="tl">Arriba izquierda</option>
+            <option value="tr">Arriba derecha</option>
+            <option value="bl">Abajo izquierda</option>
+            <option value="br">Abajo derecha</option>
+          </select>
+        </div>
+      </section>
+      <section class="sec" data-sec="remoto">
+        <h2><span class="num">09</span>Control remoto</h2>
+        <p class="hint" style="margin-top:0">Manejá modos, escenas y texto desde el celular. Escaneá el QR con la cámara; necesita internet en los dos dispositivos.</p>
+        <button type="button" class="btn ghost" id="btn-remote">Activar control remoto</button>
+        <div class="remote-box" id="remote-box" hidden>
+          <img id="remote-qr" alt="Código QR para conectar el celular" width="168" height="168">
+          <p class="hint" id="remote-count">Esperando celulares…</p>
+          <button type="button" class="btn ghost" id="btn-remote-copy">Copiar link</button>
+        </div>
+      </section>
+      <section class="sec" data-sec="grabar">
+        <h2><span class="num">10</span>Grabar</h2>
+        <p class="hint" style="margin-top:0">Graba lo que se ve (con video, texto y logo) más el sonido de la entrada, y lo guarda como .webm. Al empezar, elegí <b>esta pestaña</b> y el panel se oculta solo. Para cortar: <kbd>R</kbd>.</p>
+        <button type="button" class="btn ghost" id="btn-rec">Empezar a grabar</button>
+      </section>
+
       <section class="sec" data-sec="atajos">
-        <h2><span class="num">06</span>Atajos</h2>
+        <h2><span class="num">11</span>Atajos</h2>
         <div class="keys">
       <span><kbd>H</kbd> panel</span>
       <span><kbd>M</kbd> modo</span>
-      <span><kbd>1</kbd>–<kbd>7</kbd> directo</span>
+      <span><kbd>1</kbd>–<kbd>0</kbd> modo directo</span>
       <span><kbd>C</kbd> color</span>
       <span><kbd>V</kbd> fondo</span>
       <span><kbd>N</kbd> preset</span>
       <span><kbd>F</kbd> pantalla completa</span>
+          <span><kbd>⇧</kbd><kbd>1</kbd>–<kbd>9</kbd> escena</span>
+          <span><kbd>,</kbd><kbd>.</kbd> escena ant./sig.</span>
+          <span><kbd>T</kbd> texto</span>
+          <span><kbd>L</kbd> logo</span>
+          <span><kbd>B</kbd> blackout</span>
+          <span><kbd>X</kbd> flash</span>
+          <span><kbd>R</kbd> grabar</span>
       <span><kbd>+</kbd><kbd>−</kbd> sensibilidad</span>
     </div>
       </section>
     </div>
   </aside>
+
+  <div id="remote" aria-live="polite"></div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

@@ -68,6 +68,7 @@ body.idle .panel, body.ui-off .panel {
 
 .field { margin-top: 12px; }
 .field:first-of-type { margin-top: 0; }
+.field.checks { margin-top: 12px; }
 .field label {
   display: flex;
   justify-content: space-between;

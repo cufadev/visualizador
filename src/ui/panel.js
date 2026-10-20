@@ -22,7 +22,7 @@ export function createPanel({ engine, renderer, background }) {
     b.type = 'button';
     b.className = 'card';
     b.dataset.mode = m.id;
-    b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${m.icon}</svg><span>${m.name}</span><kbd>${i + 1}</kbd>`;
+    b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${m.icon}</svg><span>${m.name}</span><kbd>${(i + 1) % 10}</kbd>`;
     b.addEventListener('click', () => selectMode(m.id));
     modesEl.append(b);
   });
@@ -243,6 +243,22 @@ export function createPanel({ engine, renderer, background }) {
     });
   });
 
+  function useYouTube(url) {
+    if (location.protocol === 'file:') return;
+    ytInput.value = url;
+    if (background.loadYouTube(url)) {
+      set('youtubeUrl', url);
+      setBackground('youtube');
+    }
+  }
+
+  function setPreset(name) {
+    if (!renderer.milk.names.includes(name)) return;
+    renderer.milk.setPreset(name);
+    presetSel.value = name;
+    set('milkPreset', name);
+  }
+
   // ---------- panel ----------
   $('#btn-hide').addEventListener('click', toggleUI);
   function toggleUI() {
@@ -280,6 +296,11 @@ export function createPanel({ engine, renderer, background }) {
     nextPreset,
     cycleMode: (d) => selectMode(modeIds[(modeIds.indexOf(get('mode')) + d + modeIds.length) % modeIds.length]),
     modeByIndex: (i) => modeIds[i] && selectMode(modeIds[i]),
+    setPalette: (id) => paletteIds.includes(id) && set('palette', id),
+    setSensitivity: (v) => set('sensitivity', Math.min(4, Math.max(0.2, Math.round(v * 10) / 10))),
+    setText: (v) => set('text', String(v).slice(0, 120)),
+    setTextOn: (v) => set('textOn', !!v),
+    setLogoOn: (v) => set('logoOn', !!v),
     cyclePalette: (d) => {
       const next = paletteIds[(paletteIds.indexOf(get('palette')) + d + paletteIds.length) % paletteIds.length];
       set('palette', next);
@@ -305,5 +326,5 @@ export function createPanel({ engine, renderer, background }) {
     },
   };
 
-  return { actions, update, restore, selectMode, refreshDevices, syncSource, syncMode };
+  return { actions, update, restore, selectMode, refreshDevices, syncSource, syncMode, setBackground, useYouTube, setPreset };
 }

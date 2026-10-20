@@ -5,13 +5,19 @@ import { createSpiral } from './modes/spiral.js';
 import { createScope } from './modes/scope.js';
 import { createRings } from './modes/rings.js';
 import { createWaterfall } from './modes/waterfall.js';
+import { createTunnel } from './modes/tunnel.js';
+import { createPlasma } from './modes/plasma.js';
+import { createKaleido } from './modes/kaleido.js';
 import { createMilkdrop } from './modes/milkdrop.js';
-import { getPalette } from './palettes.js';
+import { getPalette, getPaletteRGBA } from './palettes.js';
+import { ShaderSurface } from './shader.js';
 
 export class Renderer {
-  constructor({ fxCanvas, glCanvas, engine, onMilkError }) {
+  constructor({ fxCanvas, glCanvas, shCanvas, engine, onMilkError }) {
     this.fx = fxCanvas;
     this.gl = glCanvas;
+    this.shCanvas = shCanvas;
+    this.sh = new ShaderSurface(shCanvas);
     this.g = fxCanvas.getContext('2d');
     this.engine = engine;
     this.milk = createMilkdrop({ glCanvas, engine, onError: onMilkError });
@@ -22,6 +28,9 @@ export class Renderer {
       createScope(),
       createRings(),
       createWaterfall(),
+      createTunnel(),
+      createPlasma(),
+      createKaleido(),
       this.milk,
     ];
     this.mode = this.modes[0];
@@ -47,10 +56,12 @@ export class Renderer {
     this.frame.w = w;
     this.frame.h = h;
     this.milk.resize(w, h);
+    this.sh.resize(w, h, Math.min(dpr, 1.5));
   }
 
   setPalette(id) {
     this.frame.color = getPalette(id);
+    this.sh.setPalette(getPaletteRGBA(id));
   }
 
   setSensitivity(v) {
@@ -61,6 +72,15 @@ export class Renderer {
   // Devuelve false si el modo no pudo iniciarse (por ejemplo, sin WebGL)
   async setMode(id) {
     const mode = this.modes.find((m) => m.id === id) || this.modes[0];
+    if (mode.frag) {
+      if (!this.sh.init()) return false;
+      try {
+        this.sh.use(mode);
+      } catch (err) {
+        console.error('Shader', mode.id, err);
+        return false;
+      }
+    }
     if (mode.gl) {
       await this.engine.ensureContext();
       const ok = await mode.init();
@@ -70,7 +90,8 @@ export class Renderer {
     mode.reset?.();
     this.mode = mode;
     this.gl.classList.toggle('on', !!mode.gl);
-    this.fx.classList.toggle('off', !!mode.gl);
+    this.shCanvas.classList.toggle('on', !!mode.frag);
+    this.fx.classList.toggle('off', !!mode.gl || !!mode.frag);
     this.g.clearRect(0, 0, this.frame.w, this.frame.h);
     return true;
   }
@@ -95,6 +116,11 @@ export class Renderer {
     f.level = e.level;
     f.beat = e.beat;
     f.beatFired = e.beatFired;
+
+    if (this.mode.frag) {
+      this.sh.draw(f);
+      return;
+    }
 
     const g = this.g;
     if (this.mode.trail) {

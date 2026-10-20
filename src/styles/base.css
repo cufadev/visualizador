@@ -27,7 +27,7 @@ body {
 body.idle { cursor: none; }
 
 /* capas: video -> velo -> milkdrop -> canvas 2D */
-#bg-video, #bg-youtube, #gl, #fx, #veil {
+#bg-video, #bg-youtube, #gl, #sh, #fx, #veil {
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -51,7 +51,8 @@ body.idle { cursor: none; }
 #bg-video.on, #bg-youtube.on { opacity: 1; }
 #veil { z-index: 2; background: #000; opacity: 0; pointer-events: none; }
 #gl { z-index: 3; display: none; }
-#gl.on { display: block; }
+#gl.on, #sh.on { display: block; }
+#sh { z-index: 3; display: none; }
 #fx { z-index: 4; }
 #fx.off { display: none; }
 

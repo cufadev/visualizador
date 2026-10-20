@@ -1,0 +1,30 @@
+/* Pantalla del celular (?remote=…) */
+body.remote-mode { overflow: auto; background: var(--bg); }
+body.remote-mode > :not(#remote):not(script) { display: none !important; }
+#remote { display: none; }
+body.remote-mode #remote { display: block; min-height: 100vh; padding-bottom: 32px; }
+
+.r-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: rgba(8, 8, 10, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.r-head strong { letter-spacing: 0.22em; font-size: 15px; }
+.r-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); margin-left: auto; }
+.r-dot.on { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+.r-dot.off { background: var(--danger); }
+.r-status { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.r-body { padding: 12px 16px; display: grid; gap: 4px; }
+.r-group { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.r-group h2 { margin-bottom: 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.r-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 6px 0 14px; border-bottom: 1px solid var(--line); }
+.r-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.r-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.r-btn { min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation; }
+.r-btn:active { transform: scale(0.97); }
+.r-btn.big { min-height: 64px; font-size: 16px; font-weight: 600; }
+.r-btn.wide { width: 100%; margin-top: 10px; }
+.r-btn[aria-pressed='true'] { background: var(--accent-soft); border-color: rgba(255, 78, 1, 0.6); color: #fff; }
+.r-quick .r-btn.big[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); }
+.r-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.r-chip { height: 40px; border: 2px solid transparent; border-radius: 10px; cursor: pointer; }
+.r-chip[aria-pressed='true'] { border-color: #fff; }
+.r-range { width: 100%; height: 36px; accent-color: var(--accent); }
+.r-input { width: 100%; height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0, 0, 0, 0.4); color: var(--text); font: inherit; font-size: 16px; }
+.r-note { color: var(--muted); font-size: 13px; padding: 12px 0; }

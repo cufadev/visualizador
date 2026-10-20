@@ -58,3 +58,30 @@ export function paletteCss(id) {
   }
   return `linear-gradient(90deg, ${STOPS[id].join(', ')})`;
 }
+
+// Paleta como textura RGBA de 256x1 para los shaders
+function hslToRgb(h, s, l) {
+  const k = (n) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+
+export function getPaletteRGBA(id) {
+  if (!(id in PALETTE_NAMES)) id = 'brasa';
+  const out = new Uint8Array(256 * 4);
+  const stops = id === 'espectro' ? null : STOPS[id].map(hex);
+  for (let i = 0; i < 256; i++) {
+    let c;
+    if (!stops) {
+      c = hslToRgb(Math.round((i / 255) * 300), 0.95, 0.56);
+    } else {
+      const p = (i / 255) * (stops.length - 1);
+      const a = Math.min(stops.length - 2, Math.floor(p));
+      const k = p - a;
+      c = stops[a].map((v, j) => Math.round(v + (stops[a + 1][j] - v) * k));
+    }
+    out.set([c[0], c[1], c[2], 255], i * 4);
+  }
+  return out;
+}
